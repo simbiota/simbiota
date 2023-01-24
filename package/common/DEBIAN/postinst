@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+    # enable the service
+      systemctl --system daemon-reload
+      systemctl enable simbiota.service
+
+      # update man
+      mandb > /dev/null
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+exit 0

@@ -1,0 +1,31 @@
+[workspace]
+members = [
+    "client-lib",
+    "control-protocol",
+    "fanotify-monitor",
+    "simbiota",
+    "simbiotactl",
+]
+
+[workspace.dependencies]
+simbiota-database = { git = "ssh://git@github.com/simbiota/database.git" }
+simbiota-tlsh = { git = "ssh://git@github.com/simbiota/tlsh-rust.git" }
+simbiota-clientlib = { version = "0.0.1", path = "client-lib" }
+simbiota-monitor = { version = "0.0.1", path = "fanotify-monitor" }
+simbiota-protocol = { version = "0.0.1", path = "control-protocol" }
+
+# needed for maximum performance
+[profile.dev.package.simbiota-tlsh]
+opt-level = 3
+debug = false
+[profile.release.package.simbiota-tlsh]
+opt-level = 3
+debug = false
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+strip = true
+lto = true
+panic = "abort"
