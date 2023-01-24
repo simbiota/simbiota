@@ -1,0 +1,11 @@
+[Unit]
+Description=SIMBIoTA Client Daemon
+After=network.target
+
+[Service]
+Type=exec
+ExecStart=/usr/sbin/simbiota
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

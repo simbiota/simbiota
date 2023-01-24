@@ -1,0 +1,52 @@
+detector:
+  class: simple_tlsh
+  config:
+    threshold: 40
+
+monitor:
+  paths:
+    - path: "/"
+      filesystem: true
+      mask:
+        - OPEN_EXEC_PERM
+email:
+
+  # Set to true to enable email alerts
+  enabled: false
+
+  # Send alert emails to the following addresses
+  recipients:
+  #    - test1@domain.com
+  #    - test2@domain2.com
+
+  # SMTP server config, required for email sending
+  smtp:
+#    server: mail.example.com
+#    port: 587
+#    username: noreply@example.com
+#    password: SuperS3cret
+#    security: STARTTLS           # valid options are `none`, `SSL`, `STARTTLS`
+
+logger:
+  - output: console
+    target: stderr
+    level: warn
+  - output: file
+    level: warn
+    path: /var/log/simbiota/simbiota.log
+
+cache:
+  # Disable caching if it is needed
+  disable: false
+
+database:
+  database_file: /var/lib/simbiota/database.sdb
+
+quarantine:
+  enabled: true
+  path: /var/lib/simbiota/quarantine
+
+updater:
+  server:
+    host: <update_server>:1880
+    architecture: ARM

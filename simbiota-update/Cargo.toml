@@ -1,0 +1,17 @@
+[package]
+name = "simbiota-update"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+simbiota-database = { git = "ssh://git@dev.ukatemi.com/simbiota/database.git" } # database access
+simbiota-clientlib = { version = "0.0.1", path = "../client-lib" }  # client implementation core
+log = "0.4.17" # logging events
+simple_logger = "4.0.0" # startup and verbose logging
+clap = { version = "4.2.7", features = ["derive"] }
+serde = { version = "1.0.162", features = ["derive"] }
+serde_yaml = "0.9.21"
+reqwest = { version = "0.11.17", default-features = false, features = ["rustls-tls","blocking"] }
+tempfile = "3.5.0"

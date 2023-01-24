@@ -1,0 +1,257 @@
+#compdef simbiotactl
+
+autoload -U is-at-least
+
+_simbiotactl() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_simbiotactl_commands" \
+"*::: :->simbiotactl" \
+&& ret=0
+    case $state in
+    (simbiotactl)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:simbiotactl-command-$line[1]:"
+        case $line[1] in
+            (quarantine)
+_arguments "${_arguments_options[@]}" \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_simbiotactl__quarantine_commands" \
+"*::: :->quarantine" \
+&& ret=0
+
+    case $state in
+    (quarantine)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:simbiotactl-quarantine-command-$line[1]:"
+        case $line[1] in
+            (list)
+_arguments "${_arguments_options[@]}" \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(restore)
+_arguments "${_arguments_options[@]}" \
+'-h[Print help]' \
+'--help[Print help]' \
+':id_or_path:' \
+&& ret=0
+;;
+(delete)
+_arguments "${_arguments_options[@]}" \
+'-h[Print help]' \
+'--help[Print help]' \
+':id_or_path:' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+":: :_simbiotactl__quarantine__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:simbiotactl-quarantine-help-command-$line[1]:"
+        case $line[1] in
+            (list)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+(restore)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+(delete)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+":: :_simbiotactl__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:simbiotactl-help-command-$line[1]:"
+        case $line[1] in
+            (quarantine)
+_arguments "${_arguments_options[@]}" \
+":: :_simbiotactl__help__quarantine_commands" \
+"*::: :->quarantine" \
+&& ret=0
+
+    case $state in
+    (quarantine)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:simbiotactl-help-quarantine-command-$line[1]:"
+        case $line[1] in
+            (list)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+(restore)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+(delete)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_simbiotactl_commands] )) ||
+_simbiotactl_commands() {
+    local commands; commands=(
+'quarantine:Manual scan operations Quarantine operations' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'simbiotactl commands' commands "$@"
+}
+(( $+functions[_simbiotactl__help__quarantine__delete_commands] )) ||
+_simbiotactl__help__quarantine__delete_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl help quarantine delete commands' commands "$@"
+}
+(( $+functions[_simbiotactl__quarantine__delete_commands] )) ||
+_simbiotactl__quarantine__delete_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl quarantine delete commands' commands "$@"
+}
+(( $+functions[_simbiotactl__quarantine__help__delete_commands] )) ||
+_simbiotactl__quarantine__help__delete_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl quarantine help delete commands' commands "$@"
+}
+(( $+functions[_simbiotactl__help_commands] )) ||
+_simbiotactl__help_commands() {
+    local commands; commands=(
+'quarantine:Manual scan operations Quarantine operations' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'simbiotactl help commands' commands "$@"
+}
+(( $+functions[_simbiotactl__help__help_commands] )) ||
+_simbiotactl__help__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl help help commands' commands "$@"
+}
+(( $+functions[_simbiotactl__quarantine__help_commands] )) ||
+_simbiotactl__quarantine__help_commands() {
+    local commands; commands=(
+'list:List quarantined files' \
+'restore:Restore a file from quarantine' \
+'delete:Permanently delete a file from quarantine' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'simbiotactl quarantine help commands' commands "$@"
+}
+(( $+functions[_simbiotactl__quarantine__help__help_commands] )) ||
+_simbiotactl__quarantine__help__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl quarantine help help commands' commands "$@"
+}
+(( $+functions[_simbiotactl__help__quarantine__list_commands] )) ||
+_simbiotactl__help__quarantine__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl help quarantine list commands' commands "$@"
+}
+(( $+functions[_simbiotactl__quarantine__help__list_commands] )) ||
+_simbiotactl__quarantine__help__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl quarantine help list commands' commands "$@"
+}
+(( $+functions[_simbiotactl__quarantine__list_commands] )) ||
+_simbiotactl__quarantine__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl quarantine list commands' commands "$@"
+}
+(( $+functions[_simbiotactl__help__quarantine_commands] )) ||
+_simbiotactl__help__quarantine_commands() {
+    local commands; commands=(
+'list:List quarantined files' \
+'restore:Restore a file from quarantine' \
+'delete:Permanently delete a file from quarantine' \
+    )
+    _describe -t commands 'simbiotactl help quarantine commands' commands "$@"
+}
+(( $+functions[_simbiotactl__quarantine_commands] )) ||
+_simbiotactl__quarantine_commands() {
+    local commands; commands=(
+'list:List quarantined files' \
+'restore:Restore a file from quarantine' \
+'delete:Permanently delete a file from quarantine' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'simbiotactl quarantine commands' commands "$@"
+}
+(( $+functions[_simbiotactl__help__quarantine__restore_commands] )) ||
+_simbiotactl__help__quarantine__restore_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl help quarantine restore commands' commands "$@"
+}
+(( $+functions[_simbiotactl__quarantine__help__restore_commands] )) ||
+_simbiotactl__quarantine__help__restore_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl quarantine help restore commands' commands "$@"
+}
+(( $+functions[_simbiotactl__quarantine__restore_commands] )) ||
+_simbiotactl__quarantine__restore_commands() {
+    local commands; commands=()
+    _describe -t commands 'simbiotactl quarantine restore commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_simbiotactl" ]; then
+    _simbiotactl "$@"
+else
+    compdef _simbiotactl simbiotactl
+fi

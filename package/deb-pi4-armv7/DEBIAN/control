@@ -1,0 +1,7 @@
+Package: simbiota
+Version: 0.0.1
+Section: utils
+Priority: optional
+Architecture: armhf
+Description: SIMBIoTA Client Daemon
+Maintainer: Ukatemi Technologies Zrt.

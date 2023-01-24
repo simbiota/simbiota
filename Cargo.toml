@@ -1,0 +1,32 @@
+[workspace]
+members = [
+    "client-lib",
+    "control-protocol",
+    "fanotify-monitor",
+    "simbiota",
+    "simbiota-update",
+    "simbiotactl",
+    "fs-scanner",
+]
+
+[profile.dev.package.simbiota-tlsh]
+opt-level = 3
+debug = false
+
+[profile.release.package.simbiota-tlsh]
+opt-level = 3
+debug = false
+# enable for minimal size, but perf is better without
+#opt-level = "z"
+
+[profile.dev]
+# enable for minimal size, but perf is better without
+#opt-level = "z"
+panic = "abort"
+
+[profile.release]
+strip = true
+lto = true
+# enable for minimal size, but perf is better without
+#opt-level = "z"
+panic = "abort"
