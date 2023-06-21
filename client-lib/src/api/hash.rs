@@ -134,8 +134,10 @@ where
         let mut buffer = [0; READ_BUFFER_SIZE];
 
         let mut tlsh = A::new();
-        while input.read(&mut buffer)? > 0 {
-            tlsh.update(&buffer);
+        let mut read = input.read(&mut buffer).unwrap();
+        while read > 0 {
+            tlsh.update(&buffer[0..read]);
+            read = input.read(&mut buffer).unwrap();
         }
         tlsh.finalize();
         let Some(hash) = tlsh.get_hash() else {

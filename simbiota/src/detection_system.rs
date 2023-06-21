@@ -16,15 +16,15 @@ use std::sync::{mpsc, Arc, Mutex};
 use std::time::Instant;
 use std::{process, thread};
 
-use fanotify_monitor::monitor::{fanotify_event_metadata, FilesystemMonitor};
-use fanotify_monitor::FanotifyEventResponse;
-use fanotify_monitor::FanotifyEventResponse::{Allow, Deny};
 use simbiota_clientlib::api::cache::{DetectionCache, NoopCache};
 use simbiota_clientlib::api::detector::DetectionResult::Match;
 use simbiota_clientlib::api::detector::{DetectionResult, Detector};
 use simbiota_clientlib::client_config::ClientConfig;
 use simbiota_clientlib::detector::DetectorProvider;
 use simbiota_clientlib::system_database::SystemDatabase;
+use simbiota_monitor::monitor::{fanotify_event_metadata, FilesystemMonitor};
+use simbiota_monitor::FanotifyEventResponse;
+use simbiota_monitor::FanotifyEventResponse::{Allow, Deny};
 
 use crate::daemon_config::DaemonConfig;
 use crate::memory_detection_cache::MemoryDetectionCache;
@@ -338,7 +338,7 @@ impl DetectionSystem {
         /// SAFETY: If fanotify does not return a valid filedescriptor, we have bigger
         /// problems than invalid handles in rust
         let mut file = unsafe { File::from_raw_fd(event_meta.fd) };
-        let maybe_filename = fanotify_monitor::get_filename_from_fd(event_meta.fd);
+        let maybe_filename = simbiota_monitor::get_filename_from_fd(event_meta.fd);
         let has_filename = maybe_filename.is_some();
         let filename = maybe_filename.unwrap_or_else(|| "<n/a>".to_string());
         let orig_fname = filename.clone();

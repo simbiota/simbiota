@@ -6,6 +6,9 @@ case "$1" in
     # enable the service
       systemctl --system daemon-reload
       systemctl enable simbiota.service
+
+      # update man
+      mandb > /dev/null
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

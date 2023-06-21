@@ -9,10 +9,6 @@ use crate::logging::SimbiotaLoggerHolder;
 use crate::syslog_appender::{SyslogAppender, SyslogFormat};
 use clap::Parser;
 use crossbeam_channel::{Receiver, Sender};
-use fanotify_monitor::monitor::{
-    EventFlags, EventMask, FANClass, FanotifyInitError, FanotifyMarkError, FilesystemMonitor,
-    MarkFlags,
-};
 use inotify::{Inotify, WatchMask};
 use libc::setsid;
 use log::{debug, error, info, logger, warn, LevelFilter};
@@ -25,6 +21,10 @@ use log4rs::Config;
 use simbiota_clientlib::client_config::ClientConfig;
 use simbiota_clientlib::detector::tlsh_detector::SimpleTLSHDetectorProvider;
 use simbiota_clientlib::system_database::SystemDatabase;
+use simbiota_monitor::monitor::{
+    EventFlags, EventMask, FANClass, FanotifyInitError, FanotifyMarkError, FilesystemMonitor,
+    MarkFlags,
+};
 use simple_logger::SimpleLogger;
 use std::cell::RefCell;
 use std::collections::HashMap;

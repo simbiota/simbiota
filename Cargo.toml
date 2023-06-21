@@ -4,29 +4,28 @@ members = [
     "control-protocol",
     "fanotify-monitor",
     "simbiota",
-    "simbiota-update",
     "simbiotactl",
-    "fs-scanner",
 ]
 
+[workspace.dependencies]
+simbiota-database = { git = "ssh://git@github.com/simbiota/database.git" }
+simbiota-tlsh = { git = "ssh://git@github.com/simbiota/tlsh-rust.git" }
+simbiota-clientlib = { version = "0.0.1", path = "client-lib" }
+simbiota-monitor = { version = "0.0.1", path = "fanotify-monitor" }
+simbiota-protocol = { version = "0.0.1", path = "control-protocol" }
+
+# needed for maximum performance
 [profile.dev.package.simbiota-tlsh]
 opt-level = 3
 debug = false
-
 [profile.release.package.simbiota-tlsh]
 opt-level = 3
 debug = false
-# enable for minimal size, but perf is better without
-#opt-level = "z"
 
 [profile.dev]
-# enable for minimal size, but perf is better without
-#opt-level = "z"
 panic = "abort"
 
 [profile.release]
 strip = true
 lto = true
-# enable for minimal size, but perf is better without
-#opt-level = "z"
 panic = "abort"

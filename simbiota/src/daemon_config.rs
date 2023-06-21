@@ -1,7 +1,7 @@
 use crate::quarantine::Quarantine;
-use fanotify_monitor::monitor::{EventMask, MonitorFlags};
 use linked_hash_map::LinkedHashMap;
 use log::{debug, info, warn};
+use simbiota_monitor::monitor::{EventMask, MonitorFlags};
 use std::any::Any;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};

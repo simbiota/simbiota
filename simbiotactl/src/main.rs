@@ -1,6 +1,6 @@
 use crate::cli::{Cli, QuarantineCommand, Subsys};
 use clap::Parser;
-use control_protocol::{Command, CommandRequest, CommandResponse, Response};
+use simbiota_protocol::{Command, CommandRequest, CommandResponse, Response};
 use std::io::{Read, Write};
 use std::os::unix::net::UnixStream;
 use std::process::exit;
@@ -63,7 +63,7 @@ fn main() {
 
     let response: CommandResponse =
         serde_json::from_slice(&response_bytes).expect("invalid response");
-    if let control_protocol::CommandStatus::Failure(reason) = response.status {
+    if let simbiota_protocol::CommandStatus::Failure(reason) = response.status {
         eprintln!("command failed: {}", reason);
     } else {
         match response.response {

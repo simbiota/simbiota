@@ -1,10 +1,10 @@
 use crate::detection_system;
 use crate::detection_system::Action::QueryQuarantine;
 use crate::detection_system::{Action, CommandResult, DetectionSystem, DetectorCommand};
-use control_protocol::{Command, CommandRequest, CommandResponse, CommandStatus, Response};
 use crossbeam_channel::{Receiver, Sender};
 use libc::c_char;
 use log::{debug, error, info};
+use simbiota_protocol::{Command, CommandRequest, CommandResponse, CommandStatus, Response};
 use std::ffi::CString;
 use std::io::{BufRead, Write};
 use std::os::fd::OwnedFd;
