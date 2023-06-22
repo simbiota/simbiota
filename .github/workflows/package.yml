@@ -26,15 +26,16 @@ jobs:
         TLSH_KEY : ${{secrets.DEPLOY_TLSH}}
         DATABASE_KEY: ${{secrets.DEPLOY_DATABASE}}
       run: |
-        echo '#!/bin/bash' > ssh_wrap.sh
-        echo 'set -x' >> ssh_wrap.sh
-        echo 'for last in ${!#}; do :; done' >> ssh_wrap.sh
-        echo 'key_file=$(mktemp -u)' >> ssh_wrap.sh
-        echo 'trap "rm -f $key_file" EXIT' >> ssh_wrap.sh
-        echo 'eval last=$last' >> ssh_wrap.sh
-        echo 'ssh-add -L | grep --max-count=1 $last > $key_file' >> ssh_wrap.sh
-        echo 'chmod 600 $key_file'
-        echo 'ssh -i $key_file -o StrictHostKeyChecking=no "$@"' >> ssh_wrap.sh
+        cat > ssh_wrap.sh <<- EOF
+        #!/bin/bash
+        set -x
+        for last in \$@; do :; done
+        key_file=\$(mktemp -u)
+        trap "rm -f \$key_file" EXIT
+        eval last=\$last
+        ssh-add -L | grep --max-count=1 \$last > \$key_file
+        ssh -i \$key_file -o StrictHostKeyChecking=no "\$@"
+        EOF
         cat ssh_wrap.sh
         eval `ssh-agent -s`
         echo "Adding SSH key1"
