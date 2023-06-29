@@ -213,7 +213,8 @@ impl SimbiotaClientDaemon {
             let mut inotify = Inotify::init()
                 .expect("failed to init inotify. Cannot watch database file for changes");
             inotify
-                .add_watch(dbfile_clone, WatchMask::CLOSE_WRITE)
+                .watches()
+                .add(dbfile_clone, WatchMask::CLOSE_WRITE)
                 .unwrap();
             let mut buffer = [0; 1024];
             info!("watching database file for changes");
