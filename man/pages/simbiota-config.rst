@@ -5,7 +5,7 @@ DESCRIPTION:
 ------------
 
 The configuration for SIMBIoTA Client is stored in a file (default location: ``/etc/simbiota/client.yaml``), in YAML format.
-The file contains the configuration of :manpage:`simbiota(8)` and :manpage:`simbiota-update(8)`.
+The file contains the configuration of :manpage:`simbiota(8)`.
 
 YAML is a hierarchical format containing key-value pairs and it is easy to read and write for humans. The default configuration
 contains sensible defaults for the program, but requires the user to provide email and update server information.
@@ -123,16 +123,8 @@ The following sections are used to configure the program:
     - ``enabled``: Enable or disable the quarantine functionality.
     - ``path``: Path of the quarantine directory.
 
-
-``updater``
-    Options for ``simbiota-update(8)``.
-
-    - ``server``: Update server settings
-    
-        - ``host``: Update server address and port.
-        - ``architecture``: Database architecture to use.
     
 SEE ALSO:
 ---------
 
-:manpage:`simbiota(8)`, :manpage:`simbiota-update(8)`
+:manpage:`simbiota(8)`

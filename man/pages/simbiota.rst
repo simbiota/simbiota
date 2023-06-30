@@ -48,4 +48,4 @@ Options:
 SEE ALSO:
 ---------
 
-:manpage:`simbiota_config(5)`, :manpage:`simbiota-update(8)`
+:manpage:`simbiota_config(5)`

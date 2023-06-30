@@ -45,8 +45,3 @@ database:
 quarantine:
   enabled: true
   path: /var/lib/simbiota/quarantine
-
-updater:
-  server:
-    host: <update_server>:1880
-    architecture: ARM
