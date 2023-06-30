@@ -47,7 +47,8 @@ completions:
 man-pages:
 	sphinx-build -b man man man-out
 	rm -r man-out/.doctrees
-	mkdir -p ./package/common/usr/share/man/man{5,8}/
+	mkdir -p ./package/common/usr/share/man/man5/
+	mkdir -p ./package/common/usr/share/man/man8/
 	cat man-out/simbiota_config.5 | gzip > ./package/common/usr/share/man/man5/simbiota_config.5.gz
 	cat man-out/simbiota.8 | gzip > ./package/common/usr/share/man/man8/simbiota.8.gz
 
