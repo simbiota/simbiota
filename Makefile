@@ -76,7 +76,7 @@ deb-pi4-armv7-nodep: deb-common
 	chmod 0755 package/deb-pi4-armv7/usr/sbin/simbiotactl
 	chmod 0644 package/deb-pi4-armv7/etc/simbiota/client.yaml
 	fakeroot dpkg-deb -Zxz --root-owner-group --build package/deb-pi4-armv7
-	mv package/deb-pi4-armv7.deb package/simbiota-0.0.1_armv7.deb
+	mv package/deb-pi4-armv7.deb package/simbiota_armv7.deb
 
 deb-pi4-arm64: deb-pi4-arm64-dep deb-pi4-arm64-nodep
 deb-pi4-arm64-nodep: deb-common
@@ -95,7 +95,7 @@ deb-pi4-arm64-nodep: deb-common
 	chmod 0755 package/deb-pi4-arm64/usr/sbin/simbiotactl
 	chmod 0644 package/deb-pi4-arm64/etc/simbiota/client.yaml
 	fakeroot dpkg-deb -Zxz --root-owner-group --build package/deb-pi4-arm64
-	mv package/deb-pi4-arm64.deb package/simbiota-0.0.1_arm64.deb
+	mv package/deb-pi4-arm64.deb package/simbiota_arm64.deb
 
 .PHONY: all clean package package-nodep
 package: deb-pi4-armv7 deb-pi4-arm64
