@@ -4,5 +4,7 @@
 .DS_Store
 target/
 package/*
+man-out/
 !package/common
+package/common/usr/share
 !package/*/DEBIAN/control

@@ -1,5 +1,3 @@
-upload_target ?= testpi
-executable_name := simbiota
 profile ?= debug
 
 # calculated stuff
@@ -34,19 +32,6 @@ ifeq (debug,$(firstword $(MAKECMDGOALS)))
   $(eval $(RUN_ARGS):;@:)
 endif
 
-.PHONY: upload debug upload8
-upload: build-pi4-armv7
-	scp target/armv7-unknown-linux-gnueabihf/$(profile)/simbiota $(upload_target):~
-	scp target/armv7-unknown-linux-gnueabihf/$(profile)/simbiota-update $(upload_target):~
-	scp target/armv7-unknown-linux-gnueabihf/$(profile)/simbiotactl $(upload_target):~
-
-upload8: build-pi4-arm64
-	scp target/aarch64-unknown-linux-gnu/$(profile)/simbiota $(upload_target):~
-	scp target/aarch64-unknown-linux-gnu/$(profile)/simbiota-update $(upload_target):~
-	scp target/aarch64-unknown-linux-gnu/$(profile)/simbiotactl $(upload_target):~
-debug: upload
-	ssh $(upload_target) -t "sudo gdbserver 0.0.0.0:1234 ./$(executable_name) $(RUN_ARGS)"
-
 # Packaging
 .PHONY: completions
 completions:
@@ -57,12 +42,20 @@ completions:
 	find ./target -name "_simbiotactl" -exec cp "{}" ./package/common/usr/share/zsh/vendor-completions/_simbiotactl \;
 	find ./target -name "simbiotactl.fish" -exec cp "{}" ./package/common/usr/share/fish/completions \;
 
+# man pages
+.PHONY: man-pages
+man-pages:
+	sphinx-build -b man man man-out
+	rm -r man-out/.doctrees
+	mkdir -p ./package/common/usr/share/man/man{5,8}/
+	cat man-out/simbiota_config.5 | gzip > ./package/common/usr/share/man/man5/simbiota_config.5.gz
+	cat man-out/simbiota.8 | gzip > ./package/common/usr/share/man/man8/simbiota.8.gz
 
 .PHONY: deb-pi4-armv7 deb-pi4-armv7-dep deb-pi4-arm64 deb-pi4-armv64-dep deb-common deb-pi4-armv7-nodep deb-pi4-arm64-nodep
 deb-pi4-armv7-dep: build-pi4-armv7
 deb-pi4-arm64-dep: build-pi4-arm64
 
-deb-common: completions
+deb-common: completions man-pages
 
 deb-pi4-armv7: deb-pi4-armv7-dep deb-pi4-armv7-nodep
 deb-pi4-armv7-nodep: deb-common
@@ -112,3 +105,5 @@ clean:
 	@-rm -rf ./package/deb-pi4-armv7/usr ./package/deb-pi4-armv7/etc ./package/deb-pi4-armv7/DEBIAN/postinst ./package/deb-pi4-armv7/DEBIAN/prerm ./package/deb-pi4-armv7/DEBIAN/conffiles
 	@-rm -rf ./package/deb-pi4-arm64/usr ./package/deb-pi4-armv64/etc ./package/deb-pi4-armv64/DEBIAN/postinst ./package/deb-pi4-armv64/DEBIAN/prerm ./package/deb-pi4-armv64/DEBIAN/conffiles
 	@-rm -rf ./package/*.deb
+	@-rm -rf ./man-out
+	@-rm -rf ./package/common/usr/share
