@@ -67,6 +67,7 @@ Configure Simbiota to use this database by setting the `database.database_file` 
 database:
   database_file: /var/lib/simbiota/simbiota-arm-20230630.sdb
 ...
+```
 
 ```
 Usage: simbiota [OPTIONS]
