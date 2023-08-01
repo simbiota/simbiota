@@ -102,8 +102,8 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image modules dtbs
 # IMPORTANT! replace /dev/sda in the following command with the device path of the SD card you wish to place into your RPi device
 RPI_SD_CARD_DEVICE=/dev/sda
 
-mount --mkdir /dev/${RPI_SD_CARD_DEVICE}2 /mnt/rpi/
-mount --mkdir /dev/${RPI_SD_CARD_DEVICE}1 /mnt/rpi/boot
+mount --mkdir ${RPI_SD_CARD_DEVICE}2 /mnt/rpi/
+mount --mkdir ${RPI_SD_CARD_DEVICE}1 /mnt/rpi/boot
 
 env PATH=$PATH make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH=/mnt/rpi/ modules_install
 
