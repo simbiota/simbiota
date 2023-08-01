@@ -61,6 +61,7 @@ deb-common: completions man-pages
 deb-pi4-armv7: deb-pi4-armv7-dep deb-pi4-armv7-nodep
 deb-pi4-armv7-nodep: deb-common
 	cp -R ./package/common/* ./package/deb-pi4-armv7/
+	rm ./package/deb-pi4-armv7/var/lib/simbiota/.gitkeep
 	mkdir -p ./package/deb-pi4-armv7/usr/sbin
 	mkdir -p ./package/deb-pi4-armv7/etc/simbiota
 
@@ -81,6 +82,7 @@ deb-pi4-armv7-nodep: deb-common
 deb-pi4-arm64: deb-pi4-arm64-dep deb-pi4-arm64-nodep
 deb-pi4-arm64-nodep: deb-common
 	cp -R ./package/common/* ./package/deb-pi4-arm64/
+	rm ./package/deb-pi4-arm64/var/lib/simbiota/.gitkeep
 	mkdir -p ./package/deb-pi4-arm64/usr/sbin
 	mkdir -p ./package/deb-pi4-arm64/etc/simbiota
 
