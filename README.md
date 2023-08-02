@@ -57,7 +57,7 @@ cargo build --release --target=<your-rust-target>
 In order to use Simbiota, you need a detection database.
 Download one from our [`database-releases`](https://github.com/simbiota/database-releases/releases) page.
 ```bash
-curl https://github.com/simbiota/database-releases/releases/download/20230630/simbiota-arm-20230630.sdb -o /var/lib/simbiota/simbiota-arm-20230630.sdb
+curl -L https://github.com/simbiota/database-releases/releases/download/20230630/simbiota-arm-20230630.sdb -o /var/lib/simbiota/simbiota-arm-20230630.sdb
 ```
 Configure Simbiota to use this database by setting the `database.database_file` key in your config.
 ```
