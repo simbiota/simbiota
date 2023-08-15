@@ -924,7 +924,7 @@ dependencies = [
 [[package]]
 name = "simbiota-database"
 version = "0.0.1"
-source = "git+ssh://git@github.com/simbiota/database.git#22a030138759e16e33b1c3980fd21e1a6e5fb9d4"
+source = "git+ssh://git@github.com/simbiota/database.git?branch=1-add-per-sample-threshold-to-database#016c51debef444b5555b1145b8eef330b84276c6"
 dependencies = [
  "flate2",
  "num-integer",
