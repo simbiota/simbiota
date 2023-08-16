@@ -8,8 +8,8 @@ members = [
 ]
 
 [workspace.dependencies]
-simbiota-database = { git = "ssh://git@github.com/simbiota/database.git" }
-simbiota-tlsh = { git = "ssh://git@github.com/simbiota/tlsh-rust.git" }
+simbiota-database = { git = "https://github.com/simbiota/database.git" }
+simbiota-tlsh = { git = "https://github.com/simbiota/tlsh-rust.git" }
 simbiota-clientlib = { version = "0.0.1", path = "client-lib" }
 simbiota-monitor = { version = "0.0.1", path = "fanotify-monitor" }
 simbiota-protocol = { version = "0.0.1", path = "control-protocol" }

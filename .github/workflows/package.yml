@@ -23,36 +23,7 @@ jobs:
        
     
     - name: SSH setup and build
-      env:
-        TLSH_KEY : ${{secrets.DEPLOY_TLSH}}
-        DATABASE_KEY: ${{secrets.DEPLOY_DATABASE}}
       run: |
-        cat > ssh_wrap.sh <<- EOF
-        #!/bin/bash
-        set -x
-        for last in \$@; do :; done
-        key_file=\$(mktemp -u)
-        trap "rm -f \$key_file" EXIT
-        eval last=\$last
-        ssh-add -L | grep --max-count=1 \$last > \$key_file
-        ssh -i \$key_file -o StrictHostKeyChecking=no "\$@"
-        EOF
-        cat ssh_wrap.sh
-        eval `ssh-agent -s`
-        echo "Adding SSH key1"
-        echo "$DATABASE_KEY" > database_key
-        chmod 600 database_key
-        ssh-add -v database_key
-        echo "Adding SSH key2"
-        echo "$TLSH_KEY" > tlsh_key
-        chmod 600 tlsh_key
-        ssh-add -v tlsh_key
-        echo "SSH identities added"
-        mkdir -p ~/.ssh
-        ssh-keyscan github.com >> ~/.ssh/known_hosts
-        ssh-add -L
-        chmod +x ssh_wrap.sh
-        export GIT_SSH="`pwd`/ssh_wrap.sh"
         make package profile=release
     
     - name: Upload arm64 package
