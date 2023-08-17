@@ -135,7 +135,9 @@ impl DetectorProvider for SimpleTLSHDetectorProvider {
                 }),
             )
         } else {
-            panic!("no usable object found in database. Please update to a later version")
+            panic!(
+                "no usable object found in database. Please update the database to a later version"
+            )
         };
         let detector: AbstractHashBasedDetector<TLSHHashAlg, ComparableTLSHHash> =
             AbstractHashBasedDetector::new(Box::from(comparator));
