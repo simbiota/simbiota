@@ -10,10 +10,10 @@ use crate::FanotifyEventResponse;
 use crate::FanotifyEventResponse::Allow;
 use crossbeam_channel::{Receiver, Sender};
 use libc::{
-    c_uint, fanotify_event_metadata, fanotify_init, fanotify_mark, fanotify_response, perror, poll,
-    pollfd, read, ssize_t, write, AT_FDCWD, EINVAL, EMFILE, ENODEV, ENOENT, ENOMEM, ENOSPC, ENOSYS,
-    ENOTDIR, EOPNOTSUPP, EPERM, EXDEV, FAN_ALLOW, FAN_CLASS_CONTENT, FAN_CLASS_NOTIF,
-    FAN_CLASS_PRE_CONTENT, FAN_DENY, POLLIN,
+    c_uint, close, fanotify_event_metadata, fanotify_init, fanotify_mark, fanotify_response,
+    perror, poll, pollfd, read, ssize_t, write, AT_FDCWD, EINVAL, EMFILE, ENODEV, ENOENT, ENOMEM,
+    ENOSPC, ENOSYS, ENOTDIR, EOPNOTSUPP, EPERM, EXDEV, FAN_ALLOW, FAN_CLASS_CONTENT,
+    FAN_CLASS_NOTIF, FAN_CLASS_PRE_CONTENT, FAN_DENY, POLLIN,
 };
 use log::warn;
 use std::ffi::{c_void, CString};
@@ -195,10 +195,11 @@ impl<'a> Iterator for FanotifyEventIterator<'a> {
                     && (*self.start_ptr).event_len <= self.read_len as u32
             } {
                 let current_item = unsafe { &*self.start_ptr };
-
+                let event_len = current_item.event_len;
                 // FAN_EVENT_NEXT
                 self.read_len -= current_item.event_len as isize;
-                self.start_ptr = unsafe { self.start_ptr.add(current_item.event_len as usize) };
+                self.start_ptr =
+                    unsafe { (self.start_ptr as *const u8).add(event_len as usize) as *const _ };
                 return Some(current_item);
             }
         }
@@ -360,6 +361,7 @@ pub fn monitor_listen(
                                     perror(error.as_ptr());
                                     panic!("response write failed");
                                 }
+                                close(event_meta.fd);
                             } else {
                                 let event_meta = *event_meta;
                                 sender.send(MonitorEvent::PermEvent(event_meta)).unwrap();
