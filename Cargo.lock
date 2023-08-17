@@ -923,7 +923,7 @@ dependencies = [
 [[package]]
 name = "simbiota-database"
 version = "0.0.1"
-source = "git+https://github.com/simbiota/database.git#22a030138759e16e33b1c3980fd21e1a6e5fb9d4"
+source = "git+https://github.com/simbiota/database.git#0f9d0c621096fa86402cea3dd0409b572bdca5df"
 dependencies = [
  "flate2",
  "num-integer",

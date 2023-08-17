@@ -157,7 +157,7 @@ pub struct CompareAgainstAllDetector<H>
 where
     H: ComparableHash,
 {
-    compare_fn: Box<dyn Fn(H::ResultType) -> bool>,
+    compare_fn: Box<dyn Fn(&H, &H) -> bool>,
     database: Box<dyn HashDatabase<H>>,
 }
 impl<'a, H> HashBasedDetector<'a, H> for CompareAgainstAllDetector<H>
@@ -169,9 +169,8 @@ where
         let start = Instant::now();
         let mut result = DetectionResult::NoMatch;
         for stored_hash in self.database.get_hashes() {
-            let diff = hash.diff(stored_hash);
             compare_counter += 1;
-            if (self.compare_fn)(diff) {
+            if (self.compare_fn)(hash, stored_hash) {
                 result = DetectionResult::Match;
                 break;
             }
@@ -191,7 +190,7 @@ where
 {
     pub fn new(
         database: Box<dyn HashDatabase<H>>,
-        comparator: Box<dyn Fn(H::ResultType) -> bool>,
+        comparator: Box<dyn Fn(&H, &H) -> bool>,
     ) -> Self {
         Self {
             database,
