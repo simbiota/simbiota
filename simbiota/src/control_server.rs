@@ -26,7 +26,7 @@ impl ControlServer {
         let connection = UnixStream::connect_addr(&simbiota_protocol::socket_address());
         if let Ok(_) = connection {
             error!("cannot start control server: already running");
-            eprintln!("Anothe instance of SIMBIoTA is already running");
+            eprintln!("Another instance of SIMBIoTA is already running");
             exit(1);
         }
 
