@@ -13,6 +13,14 @@ use std::sync::Arc;
 
 #[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
 pub struct QuarantineEntryInfo {
+    pub original_path: String,
+    pub uid: u32,
+    pub gid: u32,
+    pub mode: u32,
+}
+
+#[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
+pub struct LegacyQuarantineEntryInfo {
     pub original_path: OsString,
     pub uid: u32,
     pub gid: u32,
@@ -53,30 +61,79 @@ impl Quarantine {
 
     fn get_stored_entries(&self) -> Vec<QuaratineEntry> {
         let mut entries = Vec::new();
-        let mut info_entries = vec![];
         for entry in
             std::fs::read_dir(&self.quarantine_dir).expect("failed to read quarantine directory")
         {
             let entry = entry.expect("failed to read quarantine dir entry");
             let filename = entry.file_name().to_string_lossy().to_string();
             if filename.starts_with('.') && filename.ends_with(".info") {
-                // this is a info entry, we should ignore it at the moment
-                info_entries.push(filename);
+                // check whether the file is present for the given info
+
+                if let Some(f) = filename
+                    .strip_prefix('.')
+                    .and_then(|f| f.strip_suffix(".info"))
+                {
+                    let entry_path = self.quarantine_dir.join(f);
+                    if !entry_path.exists() {
+                        warn!(
+                            "quarantine entry for entry info does not exists, removing: {filename}"
+                        );
+                        if std::fs::remove_file(entry.path()).is_err() {
+                            error!(
+                                "failed to remove quarantine entry info: {}",
+                                entry.path().display()
+                            );
+                        }
+                        continue;
+                    }
+                }
             } else {
                 // this is a normal entry
                 let info_name = format!(".{}.info", filename);
                 let info_path = self.quarantine_dir.join(&info_name);
 
                 if !info_path.exists() {
-                    error!("quarantine entry info for entry does not exists, removing: {filename}");
-                    std::fs::remove_file(entry.path()).expect("failed to remove quarantine entry");
+                    warn!("quarantine entry info for entry does not exists, removing: {filename}");
+                    if std::fs::remove_file(entry.path()).is_err() {
+                        error!(
+                            "failed to remove quarantine entry: {}",
+                            entry.path().display()
+                        );
+                    }
                     continue;
                 }
 
-                let info_data = std::fs::read_to_string(info_path)
+                // check for older version of entries with OsString and convert them to String
+                // this is neccessary because we switched from OsString to String after we release the first version
+                let contents = std::fs::read_to_string(&info_path)
                     .expect("failed to read quarantine entry info");
-                let info = QuarantineEntryInfo::deserialize(&info_data);
-                entries.push(QuaratineEntry { id: filename, info });
+                let json_data = serde_json::from_str::<LegacyQuarantineEntryInfo>(&contents);
+                if let Ok(legacy_info) = json_data {
+                    warn!("converting legacy quarantine entry info to new format: {filename}");
+                    let info = QuarantineEntryInfo {
+                        original_path: legacy_info.original_path.to_string_lossy().to_string(),
+                        uid: legacy_info.uid,
+                        gid: legacy_info.gid,
+                        mode: legacy_info.mode,
+                    };
+                    std::fs::write(&info_path, info.serialize())
+                        .expect("failed to write quarantine entry info");
+                }
+
+                match std::fs::read_to_string(&info_path) {
+                    Ok(info_data) => {
+                        let info = QuarantineEntryInfo::deserialize(&info_data);
+                        entries.push(QuaratineEntry { id: filename, info });
+                    }
+                    Err(e) => {
+                        error!(
+                            "failed to read quarantine entry info: {}, removing file ({e:?})",
+                            info_path.display()
+                        );
+                        std::fs::remove_file(info_path)
+                            .unwrap_or_else(|e| error!("failed to remove info file: {:?}", e));
+                    }
+                }
             }
         }
 
@@ -97,7 +154,7 @@ impl Quarantine {
     pub fn get_entry_by_name(&self, name: &str) -> Option<QuarantineEntryInfo> {
         self.get_stored_entries()
             .iter()
-            .find(|entry| entry.info.original_path.to_str() == Some(name))
+            .find(|entry| entry.info.original_path.as_str() == name)
             .map(|e| e.info.clone())
     }
 
@@ -134,6 +191,7 @@ impl Quarantine {
     }
 
     pub fn add_file(&mut self, filename: &str) {
+        warn!("moving file to quarantine: {filename}");
         let original_path = Path::new(filename);
         if !original_path.exists() {
             warn!("file added to quarantine but it does not exists");
@@ -144,13 +202,16 @@ impl Quarantine {
             .expect("failed to get file metadata");
 
         let quarantine_entry = QuarantineEntryInfo {
-            original_path: original_path.to_path_buf().into_os_string(),
+            original_path: original_path
+                .to_path_buf()
+                .into_os_string()
+                .into_string()
+                .expect("somehow ended up with a non-utf8 filename"),
             mode: meta.st_mode(),
             uid: meta.st_uid(),
             gid: meta.st_gid(),
         };
 
-        warn!("moving file to quarantine: {filename}");
         let entry_id = uuid::Uuid::new_v4();
         let mut entry_path = self.quarantine_dir.clone();
         entry_path.push(entry_id.to_string());

@@ -10,7 +10,7 @@ use crate::syslog_appender::{SyslogAppender, SyslogFormat};
 use clap::Parser;
 use crossbeam_channel::{Receiver, Sender};
 use inotify::{Inotify, WatchMask};
-use libc::setsid;
+use libc::{getegid, geteuid, setsid};
 use log::{debug, error, info, logger, warn, LevelFilter};
 use log4rs::append::console::{ConsoleAppender, ConsoleAppenderBuilder, Target};
 use log4rs::append::file::FileAppender;
@@ -86,8 +86,6 @@ impl SimbiotaClientDaemon {
             debug!("Running in debug mode")
         }
 
-        debug!("PID: {}", std::process::id());
-
         let args = ClientArgs::parse();
         if args.bg {
             restart_in_bg();
@@ -109,6 +107,17 @@ impl SimbiotaClientDaemon {
                 .env()
                 .with_module_level("rustls", LevelFilter::Info);
             logger_holder.set_logger(Box::new(startup_log));
+        }
+
+        // print pid and EUID, EGID
+        /// SAFETY: Safe, only calls to syscalls without args
+        unsafe {
+            debug!(
+                "PID: {}, running as {}:{}",
+                std::process::id(),
+                geteuid(),
+                getegid()
+            );
         }
 
         // Register builtin providers

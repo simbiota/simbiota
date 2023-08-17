@@ -114,7 +114,7 @@ impl ControlServer {
                             entries
                                 .iter()
                                 .enumerate()
-                                .map(|(i, e)| (i, e.original_path.to_str().unwrap().to_string()))
+                                .map(|(i, e)| (i, e.original_path.clone()))
                                 .collect(),
                         ),
                     },
