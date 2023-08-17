@@ -1,5 +1,10 @@
 use serde::{Deserialize, Serialize};
+use std::os::linux::net::SocketAddrExt;
+use std::os::unix::net::SocketAddr;
 
+pub fn socket_address() -> SocketAddr {
+    SocketAddr::from_abstract_name("simbiota").unwrap()
+}
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Command {
     ManualScan { path: String, recursive: bool },

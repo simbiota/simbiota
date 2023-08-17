@@ -8,8 +8,10 @@ use simbiota_protocol::{Command, CommandRequest, CommandResponse, CommandStatus,
 use std::ffi::CString;
 use std::io::{BufRead, Write};
 use std::os::fd::OwnedFd;
-use std::os::unix::net::UnixListener;
+use std::os::unix::net::{UnixListener, UnixStream};
+use std::process::exit;
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 pub struct ControlServer {
     listener: UnixListener,
@@ -20,12 +22,20 @@ pub struct ControlServer {
 
 impl ControlServer {
     pub fn new(com: (usize, Receiver<CommandResult>, Sender<DetectorCommand>)) -> Self {
-        unsafe {
+        // check whether we can connect
+        let connection = UnixStream::connect_addr(&simbiota_protocol::socket_address());
+        if let Ok(_) = connection {
+            error!("cannot start control server: already running");
+            eprintln!("Anothe instance of SIMBIoTA is already running");
+            exit(1);
+        }
+
+        /*unsafe {
             let path = CString::new("/var/run/simbiota.sock").unwrap();
             libc::unlink(path.as_ptr() as *const c_char);
-        }
-        let listener =
-            UnixListener::bind("/var/run/simbiota.sock").expect("Failed to bind to socket");
+        }*/
+        let listener = UnixListener::bind_addr(&simbiota_protocol::socket_address())
+            .expect("Failed to bind to socket");
 
         Self {
             listener,
@@ -36,7 +46,7 @@ impl ControlServer {
     }
 
     pub fn listen(&self) -> ! {
-        info!("control server listening on /var/run/simbiota.sock");
+        info!("control server listening");
         for stream in self.listener.incoming() {
             match stream {
                 Ok(stream) => {
@@ -52,11 +62,19 @@ impl ControlServer {
     }
 
     fn serve(&self, mut stream: std::os::unix::net::UnixStream) {
+        stream
+            .set_read_timeout(Some(Duration::from_secs(60)))
+            .unwrap();
+        stream
+            .set_write_timeout(Some(Duration::from_secs(60)))
+            .unwrap();
         let mut reader = std::io::BufReader::new(&stream);
         let mut writer = std::io::BufWriter::new(&stream);
         let mut command_line = String::new();
         reader.read_line(&mut command_line).unwrap();
-
+        if command_line.is_empty() {
+            return;
+        }
         let Ok(command) = serde_json::from_str::<CommandRequest>(&command_line) else {
             error!("failed to parse command: {:?}", command_line);
             return;
