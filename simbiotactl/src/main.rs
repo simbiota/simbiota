@@ -4,18 +4,25 @@ use simbiota_protocol::{Command, CommandRequest, CommandResponse, Response};
 use std::io::{Read, Write};
 use std::os::unix::net::UnixStream;
 use std::process::exit;
+use std::time::Duration;
 
 mod cli;
 
 fn main() {
     let cli = Cli::parse();
 
-    let connection = UnixStream::connect("/var/run/simbiota.sock");
+    let connection = UnixStream::connect_addr(&simbiota_protocol::socket_address());
     if let Err(e) = connection {
         eprintln!("failed to connect to control socket: {:?}", e.to_string());
         exit(1);
     }
     let mut connection = connection.unwrap();
+    connection
+        .set_read_timeout(Some(Duration::from_secs(60)))
+        .unwrap();
+    connection
+        .set_write_timeout(Some(Duration::from_secs(60)))
+        .unwrap();
 
     let output = match cli.subsys {
         /*Subsys::Scan { command } => match command {
@@ -55,7 +62,6 @@ fn main() {
     connection.write_all(output.as_ref()).unwrap();
     connection.write_all("\n".as_ref()).unwrap();
     connection.flush().unwrap();
-
     let mut response_bytes = vec![];
     connection
         .read_to_end(&mut response_bytes)
