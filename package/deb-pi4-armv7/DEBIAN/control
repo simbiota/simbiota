@@ -3,5 +3,7 @@ Version: 0.0.1
 Section: utils
 Priority: optional
 Architecture: armhf
-Description: SIMBIoTA Client Daemon
+Description: Simbiota is a lightweight (both memory and CPU usage) antivirus.
 Maintainer: Ukatemi Technologies Zrt.
+Homepage: https://github.com/simbiota/simbiota
+Depends: jq, curl

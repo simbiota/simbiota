@@ -1,47 +1,126 @@
 detector:
+  # class - string, specifying the detector to be used
+  #         currently the only option is 'simple_tlsh'
   class: simple_tlsh
+  # config - detector-specific configuration
   config:
+    # threshold - default threshold to be used for detection
+    #             only applicable for ColoredTLSHObjects that are stored in the database
+    #             (no per-sample distance is specified in the database object)
+    #             Lower values result in less false-positives but you lose some malware
+    #             similarity detection capability. Higher values result in more false
+    #             detections (NOT RECOMMENDED).
+    #             We recommend that you leave this value at 40. Although this may result
+    #             in false positives (GO binaries are prone to this, because of static linking)
+    #             the detection does not come from the two binaries (the one in the database
+    #             and the one detected) no being similar to each other, but from that the large
+    #             similar part holds library functions that are the same in both binaries.
+    #             So we need a better detection method that can focus on the "important" parts
+    #             of a file, not change the similarity threshold. We are working on this. :) 
     threshold: 40
 
 monitor:
   paths:
+    # path - path to the filesystem object to be marked
     - path: "/"
+      # dir - true/false (false) - corresponds to FAN_MARK_ONLYDIR
+      #       If the filesystem object to be marked is not a directory, the error
+      #       ENOTDIR shall be raised.
+      # mount - true/false (false) - corresponds to FAN_MARK_MOUNT
+      #         the mount containing pathname will be marked. All directories,
+      #         subdirectories, and the contained files of the mount will be monitored.
+      # filesystem - true/false (false) - corresponds to FAN_MARK_FILESYSTEM
+      #              The filesystem containing pathname will be marked. All the contained
+      #              files and directories of the filesystem from any mount point will
+      #              be monitored.
       filesystem: true
+      # event_on_children - true/false (false) - events for the immediate children of the
+      #                     specified directory shell be created. (non-recursive)
+      # mask - specifies the fanotify_mark mask value that defines which events shall be
+      #        listened for (or which shall be ignored). This is just a summary, check out
+      #        https://man7.org/linux/man-pages/man2/fanotify_mark.2.html for details.
+      #        Possible values are:
+      #        - ACCESS         - a file or directory is accessed (read)
+      #        - MODIFY         - a file is modified (write)
+      #        - CLOSE_WRITE    - a writable file is closed
+      #        - CLOSE_NOWRITE  - a read-only file or directory is closed
+      #        - OPEN           - a file or directory is opened
+      #        - OPEN_EXEC      - a file is opened with the intent to be executed
+      #                           files that are opened using execve(2), execveat(2),
+      #                           or uselib(2)
+      #        - OPEN_PERM      - a permission to open a file or directory is requested
+      #        - OPEN_EXEC_PERM - a permission to open a file for execution is requested
+      #        - ACCESS_PERM    - a permission to read a file or directory is requested
+      #        You can specify multiple of these in multiple lines.
       mask:
         - OPEN_EXEC_PERM
 email:
-
   # Set to true to enable email alerts
   enabled: false
 
   # Send alert emails to the following addresses
-  recipients:
-  #    - test1@domain.com
-  #    - test2@domain2.com
+  #recipients:
+  #  - test1@domain.com
+  #  - test2@domain2.com
 
   # SMTP server config, required for email sending
-  smtp:
-#    server: mail.example.com
-#    port: 587
-#    username: noreply@example.com
-#    password: SuperS3cret
-#    security: STARTTLS           # valid options are `none`, `SSL`, `STARTTLS`
+  #smtp:
+  #  server: mail.example.com
+  #  port: 587
+  #  username: noreply@example.com
+  #  password: SuperS3cret
+  #  security: STARTTLS           # valid options are 'none', 'SSL', 'STARTTLS'
 
 logger:
+  # output - possible options:
+  #          - console: log to console output, 'target' may be either 'stdout' or 'stderr'
+  #          - file: log to file, 'path' specifies the file path
+  #          - syslog: log to syslog, 'format' specifies the log format, either '3164' or '5424'
+  #                    check https://datatracker.ietf.org/doc/html/rfc3164
+  #                    and https://datatracker.ietf.org/doc/html/rfc5424 for details.
+  # level  - possible options: off, error, warn, info, debug, trace
+  #          case insensitive, more details at https://crates.io/crates/log
   - output: console
     target: stderr
     level: warn
   - output: file
-    level: warn
     path: /var/log/simbiota/simbiota.log
-
+    level: warn
+  #- output: syslog
+  #  format: 5424
+  #  level: warn
 cache:
-  # Disable caching if it is needed
+  # Scanning a file takes time (depends on how fast your storage
+  # medium is). When Simbiota reaches a detection result for a file,
+  # We create a cache entry in memory. We store the file's path,
+  # timestamps, ownership information and size in a cache entry
+  # along with the detection verdict.
+  # When a new scan request arrives, Simbiota checks its cache for
+  # matching entries. If an entry fully matches, the file's considered
+  # unchanged and so the previous detection verdict still stands.
+  # If any of the stored attributes change, we redo the detection.
+  # This process massively reduces Simbiota's load on the system.
+  # e.g 241.47ms without cache and 163.49µs with cache. So a 1000x
+  # reduction in delay.
   disable: false
 
 database:
+  # Current database releases are available at
+  # https://github.com/simbiota/database-releases/releases
+  # Download one for your selected architecture.
   database_file: /var/lib/simbiota/database.sdb
 
 quarantine:
-  enabled: true
+  # When quarantine is disabled, Simbiota can only alert and log when
+  # it detects a malicious file, it cannot block its execution.
+  # On the other hand when quarantine is enabled and somehow a
+  # false positive detection occures (benign file detected as malicious)
+  # Simbiota moves it to the quarantine and so it won't be available
+  # at its original location. This may render your device unuseable
+  # until the file is manually moved back from the quarantine and
+  # the database updated.
+  # We are working hard to avoid false positive detections.
+  # As Simbiota is currently in ALPHA state, we keep the default
+  # for this option on 'false'.
+  enabled: false
   path: /var/lib/simbiota/quarantine

@@ -6,6 +6,7 @@ case "$1" in
     # enable the service
       systemctl --system daemon-reload
       systemctl enable simbiota.service
+      systemctl enable simbiota-update.timer
 
       # update man
       mandb > /dev/null
