@@ -1,0 +1,11 @@
+[Unit]
+Description=Simbiota database updater
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/simbiota-update.sh
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
