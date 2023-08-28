@@ -77,6 +77,13 @@ impl SimbiotaClientDaemon {
             }
         });*/
 
+        unsafe {
+            if geteuid() != 0 {
+                eprintln!("error: not running as root user, exiting...");
+                exit(1);
+            }
+        }
+
         // Print everything to the console if built in debug mode
         if cfg!(debug_assertions) {
             let startup_log = SimpleLogger::new()
