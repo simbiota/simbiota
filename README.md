@@ -11,15 +11,19 @@
 
 The main goal of the project is to provide a lightweight (both memory and CPU usage) antivirus mainly for resource-constrained IoT devices.
 
+The project is currently in ALPHA stage. It may detect some benign files and if quarantine is enabled, move them from their original location.
+This may render your device inoperable and you need to manually move the file back from the quarantine to its original location.
+Please create and issue if you find a false positive detection.
+
 ## Installation
 
 Currently we provide packages for Raspberry Pi devices, but we will soon create packages for other linux distributions as well.
-If you are on a different system, check that you run a kernel with `CONFIG_FANOTIFY_ACCESS_PERMISSIONS` enabled.
-If it is, than all you need to do is follow our [compilation guide](#build-yourself).
+In order for Simbiota to be able to block access to malicious files `CONFIG_FANOTIFY_ACCESS_PERMISSIONS` kernel config needs to be set
+in your running kernel. If the config is disabled, Simbiota still works but it will only alert on detection, it won't block accessing
+the malicious file.
+On stock Raspbian systems, this config is disabled.
 
-### Install the released package (Raspberry Pi (arm64/armv7))
-
-1. Check that your running kernel has `CONFIG_FANOTIFY_ACCESS_PERMISSIONS` enabled:
+You can check that your running kernel has `CONFIG_FANOTIFY_ACCESS_PERMISSIONS` enabled with the following script:
 
 ```bash
 modprobe configs
@@ -31,8 +35,29 @@ else
 fi
 ```
 
-If you need to recompile the kernel, you can follow the instructions in [installation.md](installation.md) section.
-Otherwise, if your device is ready, proceed to installing Simbiota:
+If you want to recompile the kernel, you can follow the instructions in [installation.md](installation.md) section.
+
+If it is, than all you need to do is follow our [compilation guide](#build-yourself).
+
+### Install the released package (Raspberry Pi (arm64/armv7))
+
+Figure out wether you need the `arm64` version or the `armv7l` version of the package with the following commands:
+
+```bash
+arch=$(uname -m)
+if [[ ${arch} == "aarch64" ]];
+then
+    echo "You are running an arm64 kernel, please use simbiota_0.0.1_arm64.deb.";
+elif [[ ${arch} == "armv7l" ]];
+then
+    echo "You are running an armv7l kernel, please use simbiota_0.0.1_armv7.deb.";
+else
+    echo "You are running a ${arch} kernel, we currently don't provide releases for this architecture. Please recompile Simbiota to use it on your device.";
+fi
+```
+
+If your device is ready, download the latest release of Simbiota from the [releases page](https://github.com/simbiota/simbiota/releases),
+then proceed to installing Simbiota:
 
 ```bash
 dpkg -i simbiota_0.0.1_arm64.deb
@@ -40,8 +65,9 @@ dpkg -i simbiota_0.0.1_arm64.deb
 
 ### Build yourself
 
-You can probably try Simbiota on any linux system with `CONFIG_FANOTIFY_ACCESS_PERMISSIONS` enabled, you just need to compile it.
-Simbiota is written in Rust, so you need to setup a working rust environment with either `rust` or `rustup`.
+You can probably try Simbiota on any linux system, you just need to compile it.
+Simbiota is written in Rust, so you need to setup a working rust environment with either `rust` or `rustup`
+follow your distribution's documentation. When it's ready, you can build Simbiota with the following commands:
 
 ```bash
 git clone https://github.com/simbiota/simbiota.git
@@ -54,10 +80,14 @@ cargo build --release --target=<your-rust-target>
 
 ### Database
 
-In order to use Simbiota, you need a detection database.
-Download one from our [`database-releases`](https://github.com/simbiota/database-releases/releases) page.
+**In order to use Simbiota, you need a detection database.**
+You may either use `simbiota-update.timer` systemd timer to download the latest database release every day.
+
+Or update the database with our provided script `/usr/sbin/simbiota-update.sh` (first read it, then run it as root).
+
+Or download one from our [`database-releases`](https://github.com/simbiota/database-releases/releases) page.
 ```bash
-curl -L https://github.com/simbiota/database-releases/releases/download/20230630/simbiota-arm-20230630.sdb -o /var/lib/simbiota/simbiota-arm-20230630.sdb
+curl -L https://github.com/simbiota/database-releases/releases/download/20230630/simbiota-arm-20230630.sdb -o /var/lib/simbiota/database.sdb
 ```
 Configure Simbiota to use this database by setting the `database.database_file` key in your config.
 ```
@@ -65,9 +95,23 @@ Configure Simbiota to use this database by setting the `database.database_file` 
 ---
 ...
 database:
-  database_file: /var/lib/simbiota/simbiota-arm-20230630.sdb
+  database_file: /var/lib/simbiota/database.sdb
 ...
 ```
+
+### Service
+
+The recommended way of running Simbiota is through the `simbiota.service` systemd service.
+Enable and start it with the following command:
+
+```bash
+systemctl enable simbiota.service
+systemctl start simbiota.service
+```
+
+### Arguments
+
+Check out `man simbiota` and `man simbiota_config` man pages for details.
 
 ```
 Usage: simbiota [OPTIONS]
@@ -96,13 +140,18 @@ Options:
 
 If you installed Simbiota from our released `.deb` package you should have the following files created:
 ```
+/etc/simbiota/client.yaml
 /usr/lib/systemd/system/simbiota.service
+/usr/lib/systemd/system/simbiota-update.service
+/usr/lib/systemd/system/simbiota-update.timer
 /usr/sbin/simbiota
 /usr/sbin/simbiotactl
-/usr/share/zsh/vendor-completions/_simbiotactl
-/usr/share/fish/completions/simbiotactl.fish
+/usr/sbin/simbiota-update.sh
 /usr/share/bash-completion/completions/simbiotactl
-/etc/simbiota/client.yaml
+/usr/share/fish/completions/simbiotactl.fish
+/usr/share/man/man5/simbiota_config.5.gz
+/usr/share/man/man8/simbiota.8.gz
+/usr/share/zsh/vendor-completions/_simbiotactl
 ```
 
 You should edit the config file at `/etc/simbiota/client.yaml` to your liking.
@@ -131,7 +180,7 @@ event determined by the specific mark is triggered. When `CONFIG_FANOTIFY_ACCESS
 current kernel configuration, the API also provides the ability for the process to determine whether the specific
 filesystem access event should be allowed to go through or should be blocked.
 We use this API to place the selected marks (specified in the configuration file) on filesystem objects (optionally the whole `/` filesystem)
-to get notifications when a file is accessed, opened, opened for execution.
+to get notifications when a file is accessed, opened, opened for execution etc.
 When a notification arrives, we ask the configured detection engines to determine if the target file is a malware or not.
 If it is a malware, the operation is blocked and (if configured), the file is moved to quarantine.
 
@@ -141,7 +190,7 @@ This client detects malware samples based on the currently used [database](https
 The current implementation uses a single detector, the [TLSH](https://github.com/trendmicro/tlsh) detector that
 1. calculates the TLSH hash of the scanned sample
 2. compares it to every sample in its database
-3. returns positive detection is the TLSH difference is bellow a threshold (default: 40)
+3. returns positive detection if the TLSH difference is bellow a threshold (default: 40)
 
 We based our first detector on TLSH, because through extensive testing we found that
 - it detects binary similarity particularly well
@@ -184,7 +233,7 @@ Later scanning delays would take around `100-200µs` from cache.
 ### Memory usage
 
 Memory usage of Simbiota currently adds up from 3 parts:
-- `simbiota` binary itself: `~2.5MB`
+- `simbiota` binary itself: `~2.6MB`
 - used libraries (`~1.1MB`):
   - `libc-2.31.so`: 1455120
   - `libdl-2.31.so`: 14560
@@ -192,7 +241,7 @@ Memory usage of Simbiota currently adds up from 3 parts:
   - `libpthread-2.31.so`: 160200
   - `ld-2.31.so`: 145352
 - database:
-  - our ARM database is corrently `4.4MB`
+  - our ARM database is corrently `4.5MB`
   - we will reduce this with advanced filtering
 This sums up to `~8-10MB` and only increases with the cache, that stores 48 bytes for each cached sample.
 Our test Raspberry Pi currently has `156713` files on it, if all of them are in the cache, they occupy `~7.5MB`.

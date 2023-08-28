@@ -36,10 +36,10 @@ The following sections are used to configure the program:
     The client monitors the specified paths using ``fanotify(7)``. The paths are listed as ``path`` objects inside the ``paths`` key. Each ``path`` object can contain additional information about each monitored path, such as ``fanotify(7)`` flags.
     The following options can be used for path objects:
 
-        - ``dir``: Mark path as directory, ``fanotify(7)`` will watch for events on children. (default: false)
-        - ``event_on_children``: Events for the immediate children of marked directories shall be created. note that this is not recursive.
+        - ``dir``: Corresponds to FAN_MARK_ONLYDIR. If the filesystem object to be marked is not a directory, the error ENOTDIR shall be raised. (default: false)
+        - ``event_on_children``: Events for the immediate children of marked directories shall be created. Note that this is not recursive.
           If you mark ``/usr`` with ``dir: true`` and ``event_on_children: true`` executing ``/usr/bin/ls`` will not trigger an event. (default: false)
-        - ``mount``: All directories, subdirectories, and the contained files of the mount will be monitored. (default: false)
+        - ``mount``: Corresponds to FAN_MARK_MOUNT. All directories, subdirectories, and the contained files of the mount will be monitored. (default: false)
         - ``filesystem``: Mark the entire filesystem on which the current path resides, ``fanotify(7)`` will watch for events on the entire filesystem. (default: false)
         - ``mask``: Specify the ``fanotify(7)`` masks used for see valid values in :manpage:`fanotify\_mark(2)` ``flags`` value.
 
@@ -97,8 +97,16 @@ The following sections are used to configure the program:
         - ``output``: Logger output device. The following values can be used:
         
             - ``console``: Output log messages to the console
+            
+                - ``target``: stdout/stderr
+
             - ``file``: Output log messages to a file
+            
+                - ``path``: path to target logfile (append)
+
             - ``syslog``: Output log messages to a syslog server
+
+                - ``format``: 5424/3164, syslog format to use
         
         - ``level``: Log level for this output
 
