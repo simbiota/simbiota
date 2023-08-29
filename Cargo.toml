@@ -10,9 +10,9 @@ members = [
 [workspace.dependencies]
 simbiota-database = { git = "https://github.com/simbiota/database.git" }
 simbiota-tlsh = { git = "https://github.com/simbiota/tlsh-rust.git" }
-simbiota-clientlib = { version = "0.0.1", path = "client-lib" }
-simbiota-monitor = { version = "0.0.1", path = "fanotify-monitor" }
-simbiota-protocol = { version = "0.0.1", path = "control-protocol" }
+simbiota-clientlib = { version = "0.0.2", path = "client-lib" }
+simbiota-monitor = { version = "0.0.2", path = "fanotify-monitor" }
+simbiota-protocol = { version = "0.0.2", path = "control-protocol" }
 
 # needed for maximum performance
 [profile.dev.package.simbiota-tlsh]
