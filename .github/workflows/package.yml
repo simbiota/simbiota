@@ -8,7 +8,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: rust:1.72
+    container: rust:1.72-bullseye
 
     steps:
     - uses: actions/checkout@v3
@@ -16,7 +16,8 @@ jobs:
     - name: dependencies
       run: |
         apt-get update
-        apt-get install -y openssh-client gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu fakeroot python3-sphinx python3-myst-parser
+        apt-get install -y openssh-client gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu fakeroot python3-sphinx python3-pip
+        pip3 install myst-parser
         rustup target add aarch64-unknown-linux-gnu
         rustup target add armv7-unknown-linux-gnueabihf
        
