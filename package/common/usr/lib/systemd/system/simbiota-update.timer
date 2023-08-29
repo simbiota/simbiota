@@ -1,0 +1,9 @@
+[Unit]
+Description=Simbiota database updater
+After=network.targe
+
+[Timer]
+OnCalendar=0/1:00:00
+
+[Install]
+WantedBy=timers.target

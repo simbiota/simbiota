@@ -5,6 +5,8 @@ case "$1" in
     remove)
         systemctl stop simbiota.service
         systemctl disable simbiota.service
+        systemctl stop simbiota-update.timer
+        systemctl disable simbiota-update.timer
     ;;
 
     *)

@@ -17,11 +17,7 @@ fi
 ```
 
 If you need to recompile the kernel, you can follow the instructions in [Preparing your device](#preparing-your-device) section.
-Otherwise, if your device is ready, proceed to installing `simbiota`:
-
-```bash
-dpkg -i simbiota_0.0.1_arm64.deb
-```
+Otherwise, if your device is ready, proceed to [installing `simbiota`](./README.md#install-the-released-package-raspberry-pi-arm64armv7):
 
 ## Preparing your device
 
@@ -35,16 +31,16 @@ You can either use [Raspberry Pi Imager](https://www.raspberrypi.com/software/) 
 Here we only show the manual option as the Imager is well-guided.
 
 1. Figure out whether your device supports 64-bit addresses or only legacy 32-bit addresses.
-    If you have any of the following devices, you probably want the 64-bit version:
-    - 3B
-    - 3B+
-    - 3A+
-    - 4
-    - 400
-    - CM3
-    - CM3+
-    - CM4
-    - Zero 2 W
+    ```bash
+    arch=$(uname -m)
+    if [[ ${arch} == "aarch64" ]];
+    then
+        echo "You are running an arm64, 64-bit kernel.";
+    elif [[ ${arch} == "armv7l" ]];
+    then
+        echo "You are running an armv7l, 32-bit kernel";
+    fi
+    ```
 
 1. Download the selected image from [the official site](https://www.raspberrypi.com/software/operating-systems/).
     Choose either `Desktop` and `Lite` edition. The `Desktop` version has a Graphical User Interface and many preinstalled utilities.
@@ -62,8 +58,9 @@ Here we only show the manual option as the Imager is well-guided.
 
     ```bash
     # attach the SD card to your computer, BUT DON'T MOUNT IT
-    # IMPORTANT! replace /dev/sda in the following command with the device path of the SD card you wish to place into your RPi device
-    RPI_SD_CARD_DEVICE=/dev/sda
+    # IMPORTANT! replace /dev/<device> in the following command with the device path of the SD card you wish to place into your RPi device
+    # e.g RPI_SD_CARD_DEVICE=/dev/sda
+    RPI_SD_CARD_DEVICE=/dev/<device>
     xzcat ./2023-05-03-raspios-bullseye-arm64-lite.img.xz | dd of="${RPI_SD_CARD_DEVICE}" bs=4M status=progress
     sync    # write pages to SD card
     ```
@@ -78,9 +75,11 @@ Here we only show the manual option as the Imager is well-guided.
 
 ### 1 Rebuilding the kernel
 
-You can either follow the guide on [the official site](https://www.raspberrypi.com/documentation/computers/linux_kernel.html), or use our briefed version here.
+You can either follow the guide on [the official site](https://www.raspberrypi.com/documentation/computers/linux_kernel.html) (recommended), or use our briefed version here.
 
-The following commands are for cross-compiling the kernel from an AMD64 (x86-64) machine to an Aarch64 (ARM64) RPi target.
+#### arm64 (aarch64)
+
+The following commands are for cross-compiling the kernel from an AMD64 (x86-64) machine to an `aarch64 (arm64)` RPi target.
 
 For cross-compilation you need the GNU GCC Toolchain for which you probably have a package in your distribution:
 - ubuntu/debian: `crossbuild-essential-arm64`
@@ -99,8 +98,9 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image modules dtbs
 ```
 
 ```bash
-# IMPORTANT! replace /dev/sda in the following command with the device path of the SD card you wish to place into your RPi device
-RPI_SD_CARD_DEVICE=/dev/sda
+# IMPORTANT! replace /dev/<device> in the following command with the device path of the SD card you wish to place into your RPi device
+# e.g RPI_SD_CARD_DEVICE=/dev/sda
+RPI_SD_CARD_DEVICE=/dev/<device>
 
 mount --mkdir ${RPI_SD_CARD_DEVICE}2 /mnt/rpi/
 mount --mkdir ${RPI_SD_CARD_DEVICE}1 /mnt/rpi/boot
@@ -112,11 +112,73 @@ cp arch/arm64/boot/dts/broadcom/*.dtb /mnt/rpi/boot/
 cp arch/arm64/boot/dts/overlays/*.dtb* /mnt/rpi/boot/overlays/
 cp arch/arm64/boot/dts/overlays/README /mnt/rpi/boot/overlays/
 
-echo "kernel=kernel8-fanotify.img" >> /mnt/rpi/boot/config.txt
+echo "kernel=$KERNEL-fanotify.img" >> /mnt/rpi/boot/config.txt
 
 umount /mnt/rpi/boot
 umount /mnt/rpi/
 ```
+
+#### armv7l
+
+The following commands are for cross-compiling the kernel from an `AMD64 (x86-64)` machine to an `armv7l` RPi target.
+
+For cross-compilation you need the GNU GCC Toolchain for which you probably have a package in your distribution:
+- ubuntu/debian: `crossbuild-essential-armhf`
+
+If not, you can download the somewhat official binary release from [ARM website](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads).
+Note that in this case you need to use `arm-none-linux-gnueabihf` instead of `arm-linux-gnueabihf` in the following commands.
+
+```bash
+git clone https://github.com/raspberrypi/linux
+cd linux
+```
+
+If you are using a Raspberry Pi 2, 3, 3+ and Zero 2 W, and Raspberry Pi Compute Modules 3 and 3+:
+```bash
+KERNEL=kernel7
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2709_defconfig
+```
+If you are using a Raspberry Pi 4 and 400, and Raspberry Pi Compute Module 4:
+```bash
+KERNEL=kernel7l
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2711_defconfig
+```
+If you are using a Raspberry Pi 1, Zero and Zero W, and Raspberry Pi Compute Module 1:
+```bash
+KERNEL=kernel
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcmrpi_defconfig
+```
+
+Continue for all device types:
+
+```bash
+sed -ri 's/# CONFIG_FANOTIFY_ACCESS_PERMISSIONS is not set/CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y/' ./.config
+# the following command will rebuild the kernel and may take a long time (~1-2h) with increased CPU usage
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage modules dtbs
+```
+
+```bash
+# IMPORTANT! replace /dev/<device> in the following command with the device path of the SD card you wish to place into your RPi device
+# e.g RPI_SD_CARD_DEVICE=/dev/sda
+RPI_SD_CARD_DEVICE=/dev/<device>
+
+mount --mkdir ${RPI_SD_CARD_DEVICE}2 /mnt/rpi/
+mount --mkdir ${RPI_SD_CARD_DEVICE}1 /mnt/rpi/boot
+
+env PATH=$PATH make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=/mnt/rpi/ modules_install
+
+cp arch/arm/boot/zImage /mnt/rpi/boot/$KERNEL-fanotify.img
+cp arch/arm/boot/dts/*.dtb /mnt/rpi/boot/
+cp arch/arm/boot/dts/overlays/*.dtb* /mnt/rpi/boot/overlays/
+cp arch/arm/boot/dts/overlays/README /mnt/rpi/boot/overlays/
+
+echo "kernel=$KERNEL-fanotify.img" >> /mnt/rpi/boot/config.txt
+
+umount /mnt/rpi/boot
+umount /mnt/rpi/
+```
+
+### 2 verify that the config is set
 
 Now your SD card is ready! Insert it to your device and boot up the new kernel.
 

@@ -356,7 +356,7 @@ impl DetectionSystem {
                 return if result == DetectionResult::NoMatch {
                     let logname = filename.clone();
                     bg_log!(
-                        log::Level::Debug,
+                        log::Level::Info,
                         "cached detection negative for {}",
                         logname
                     );
@@ -370,7 +370,7 @@ impl DetectionSystem {
             }
         }
         let logname = filename.clone();
-        bg_log!(log::Level::Debug, "checking file: {}", logname);
+        bg_log!(log::Level::Info, "checking file: {}", logname);
         let mut no_cache = false;
         let mut res = self
             .detector
@@ -397,11 +397,11 @@ impl DetectionSystem {
         }
 
         if res == DetectionResult::Match {
-            bg_log!(log::Level::Debug, "file matched: {}", filename);
+            bg_log!(log::Level::Info, "file matched: {}", filename);
             self.file_detected_action(orig_fname);
             bg_log!(log::Level::Debug, "detected actions done");
         } else {
-            bg_log!(log::Level::Debug, "detection negative for {}", filename);
+            bg_log!(log::Level::Info, "detection negative for {}", filename);
         }
 
         bg_log!(
@@ -427,7 +427,7 @@ impl DetectionSystem {
             };
 
             if let Some(quarantine) = &quarantine {
-                bg_log!(log::Level::Warn, "moving file to quarantine");
+                bg_log!(log::Level::Error, "moving file to quarantine");
                 quarantine.lock().unwrap().add_file(&filename);
             } else {
                 bg_log!(
