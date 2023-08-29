@@ -52,6 +52,9 @@ monitor:
       #        - OPEN_EXEC_PERM - a permission to open a file for execution is requested
       #        - ACCESS_PERM    - a permission to read a file or directory is requested
       #        You can specify multiple of these in multiple lines.
+      #        *_PERM values allow blocking the operation until Simbiota reaches a verdict
+      #        wether the file is malicious or not. These masks require `CONFIG_FANOTIFY_ACCESS_PERMISSIONS`
+      #        kernel config to be enabled.
       mask:
         - OPEN_EXEC_PERM
 email:

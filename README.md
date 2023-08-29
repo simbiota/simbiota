@@ -11,9 +11,11 @@
 
 The main goal of the project is to provide a lightweight (both memory and CPU usage) antivirus mainly for resource-constrained IoT devices.
 
-The project is currently in ALPHA stage. It may detect some benign files and if quarantine is enabled, move them from their original location.
+**The project is currently in ALPHA stage.**
+
+**It may detect some benign files and if quarantine is enabled, move them from their original location.
 This may render your device inoperable and you need to manually move the file back from the quarantine to its original location.
-Please create and issue if you find a false positive detection.
+Please create and issue if you find a false positive detection.**
 
 ## Installation
 
@@ -60,7 +62,7 @@ If your device is ready, download the latest release of Simbiota from the [relea
 then proceed to installing Simbiota:
 
 ```bash
-dpkg -i simbiota_0.0.1_arm64.deb
+apt install simbiota_0.0.1_arm64.deb
 ```
 
 ### Build yourself
@@ -86,8 +88,9 @@ You may either use `simbiota-update.timer` systemd timer to download the latest 
 Or update the database with our provided script `/usr/sbin/simbiota-update.sh` (first read it, then run it as root).
 
 Or download one from our [`database-releases`](https://github.com/simbiota/database-releases/releases) page.
+Replace `<arch>` and `<version>` with the appropriate values found on the releases page.
 ```bash
-curl -L https://github.com/simbiota/database-releases/releases/download/20230630/simbiota-arm-20230630.sdb -o /var/lib/simbiota/database.sdb
+curl -L https://github.com/simbiota/database-releases/releases/download/<version>/simbiota-<arch>-<version>.sdb -o /var/lib/simbiota/database.sdb
 ```
 Configure Simbiota to use this database by setting the `database.database_file` key in your config.
 ```

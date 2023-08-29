@@ -58,8 +58,9 @@ Here we only show the manual option as the Imager is well-guided.
 
     ```bash
     # attach the SD card to your computer, BUT DON'T MOUNT IT
-    # IMPORTANT! replace /dev/sda in the following command with the device path of the SD card you wish to place into your RPi device
-    RPI_SD_CARD_DEVICE=/dev/sda
+    # IMPORTANT! replace /dev/<device> in the following command with the device path of the SD card you wish to place into your RPi device
+    # e.g RPI_SD_CARD_DEVICE=/dev/sda
+    RPI_SD_CARD_DEVICE=/dev/<device>
     xzcat ./2023-05-03-raspios-bullseye-arm64-lite.img.xz | dd of="${RPI_SD_CARD_DEVICE}" bs=4M status=progress
     sync    # write pages to SD card
     ```
@@ -97,8 +98,9 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image modules dtbs
 ```
 
 ```bash
-# IMPORTANT! replace /dev/sda in the following command with the device path of the SD card you wish to place into your RPi device
-RPI_SD_CARD_DEVICE=/dev/sda
+# IMPORTANT! replace /dev/<device> in the following command with the device path of the SD card you wish to place into your RPi device
+# e.g RPI_SD_CARD_DEVICE=/dev/sda
+RPI_SD_CARD_DEVICE=/dev/<device>
 
 mount --mkdir ${RPI_SD_CARD_DEVICE}2 /mnt/rpi/
 mount --mkdir ${RPI_SD_CARD_DEVICE}1 /mnt/rpi/boot
@@ -156,8 +158,9 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage modules dtbs
 ```
 
 ```bash
-# IMPORTANT! replace /dev/sda in the following command with the device path of the SD card you wish to place into your RPi device
-RPI_SD_CARD_DEVICE=/dev/sda
+# IMPORTANT! replace /dev/<device> in the following command with the device path of the SD card you wish to place into your RPi device
+# e.g RPI_SD_CARD_DEVICE=/dev/sda
+RPI_SD_CARD_DEVICE=/dev/<device>
 
 mount --mkdir ${RPI_SD_CARD_DEVICE}2 /mnt/rpi/
 mount --mkdir ${RPI_SD_CARD_DEVICE}1 /mnt/rpi/boot
