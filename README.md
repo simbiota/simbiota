@@ -43,7 +43,7 @@ If it is, than all you need to do is follow our [compilation guide](#build-yours
 
 ### Install the released package (Raspberry Pi (arm64/armv7))
 
-Figure out wether you need the `arm64` version or the `armv7l` version of the package with the following commands:
+Figure out whether you need the `arm64` version or the `armv7l` version of the package with the following commands:
 
 ```bash
 arch=$(uname -m)
