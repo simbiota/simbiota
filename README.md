@@ -49,10 +49,10 @@ Figure out whether you need the `arm64` version or the `armv7l` version of the p
 arch=$(uname -m)
 if [[ ${arch} == "aarch64" ]];
 then
-    echo "You are running an arm64 kernel, please use simbiota_0.0.2_arm64.deb.";
+    echo "You are running an arm64 kernel, please use simbiota_0.0.3_arm64.deb.";
 elif [[ ${arch} == "armv7l" ]];
 then
-    echo "You are running an armv7l kernel, please use simbiota_0.0.2_armv7.deb.";
+    echo "You are running an armv7l kernel, please use simbiota_0.0.3_armv7.deb.";
 else
     echo "You are running a ${arch} kernel, we currently don't provide releases for this architecture. Please recompile Simbiota to use it on your device.";
 fi
@@ -62,7 +62,7 @@ If your device is ready, download the latest release of Simbiota from the [relea
 then proceed to installing Simbiota:
 
 ```bash
-apt install ./simbiota_0.0.2_arm64.deb
+apt install ./simbiota_0.0.3_arm64.deb
 ```
 
 ### Build yourself
