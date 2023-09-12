@@ -85,10 +85,10 @@ logger:
   #          case insensitive, more details at https://crates.io/crates/log
   - output: console
     target: stderr
-    level: warn
+    level: info
   - output: file
     path: /var/log/simbiota/simbiota.log
-    level: warn
+    level: info
   #- output: syslog
   #  format: 5424
   #  level: warn

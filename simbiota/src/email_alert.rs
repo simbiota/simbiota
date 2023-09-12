@@ -60,12 +60,12 @@ impl EmailAlertSystem {
                 .build(),
         };
 
-        debug!("sending email using {:?}", smtp_config.server);
+        info!("sending email using {:?}", smtp_config.server);
         let result = mailer.send(&email);
         if result.is_err() {
             warn!("failed to send email: {}", result.unwrap_err());
         } else {
-            debug!("alert email sent");
+            warn!("alert email sent");
         }
     }
 

@@ -74,15 +74,6 @@ pub enum CommandResult {
 }
 
 static mut VERBOSE_LOG: bool = false;
-macro_rules! bg_log {
-    ($level:expr, $($arg:tt)+) => {
-        let verbose = unsafe { VERBOSE_LOG };
-        if verbose {
-            // safe as the logger does no file accesses
-            (log!($level, $($arg)+))
-        }
-    };
-}
 
 impl DetectionSystem {
     pub fn register_provider(name: &str, provider: Arc<dyn DetectorProvider + Send + Sync>) {
@@ -330,7 +321,7 @@ impl DetectionSystem {
     fn detector_callback(&self, event_meta: &fanotify_event_metadata) -> FanotifyEventResponse {
         if event_meta.pid as u32 == self.daemon_pid {
             // ignore accesses from myself
-            bg_log!(log::Level::Debug, "ignoring access from myself");
+            debug!("ignoring access from myself");
             return FanotifyEventResponse::Allow;
         }
 
@@ -343,34 +334,30 @@ impl DetectionSystem {
         let filename = maybe_filename.unwrap_or_else(|| "<n/a>".to_string());
         let orig_fname = filename.clone();
 
+        let logname = filename.clone();
+        info!("checking file: {}", logname);
         // check cache first
         if has_filename {
             if let Some(result) = self.cache.borrow().get_result_for(&filename, event_meta) {
                 let detection_duration = detect_start_ts.elapsed();
 
-                bg_log!(
-                    log::Level::Debug,
-                    "cached scan took: {:?}",
+                debug!(
+                    "scanning took: {:?} (cached)",
                     detection_duration.clone()
                 );
                 return if result == DetectionResult::NoMatch {
-                    let logname = filename.clone();
-                    bg_log!(
-                        log::Level::Info,
-                        "cached detection negative for {}",
+                    info!(
+                        "detection negative: {} (cached)",
                         logname
                     );
                     Allow
                 } else {
-                    let logname = filename.clone();
-                    bg_log!(log::Level::Error, "cached detection positive: {}", logname);
+                    error!("detection positive: {} (cached)", logname);
                     self.file_detected_action(filename.clone());
                     Deny
                 };
             }
         }
-        let logname = filename.clone();
-        bg_log!(log::Level::Info, "checking file: {}", logname);
         let mut no_cache = false;
         let mut res = self
             .detector
@@ -378,14 +365,13 @@ impl DetectionSystem {
             .check_reader(&mut file)
             .unwrap_or_else(|e| {
                 let logname = filename.clone();
-                bg_log!(log::Level::Error, "error checking file: {}", logname);
+                warn!("error checking file: {} ({})", logname, e);
                 no_cache = true; // skip caching this result
                 DetectionResult::NoMatch
             });
 
         let detection_duration = detect_start_ts.elapsed();
-        bg_log!(
-            log::Level::Debug,
+        debug!(
             "scanning took: {:?}",
             detection_duration.clone()
         );
@@ -397,15 +383,14 @@ impl DetectionSystem {
         }
 
         if res == DetectionResult::Match {
-            bg_log!(log::Level::Info, "file matched: {}", filename);
+            error!("detection positive: {}", logname);
             self.file_detected_action(orig_fname);
-            bg_log!(log::Level::Debug, "detected actions done");
+            debug!("detected actions done");
         } else {
-            bg_log!(log::Level::Info, "detection negative for {}", filename);
+            info!("detection negative: {}", logname);
         }
 
-        bg_log!(
-            log::Level::Debug,
+        debug!(
             "blocking took: {:?}",
             detect_start_ts.elapsed()
         );
@@ -427,12 +412,11 @@ impl DetectionSystem {
             };
 
             if let Some(quarantine) = &quarantine {
-                bg_log!(log::Level::Error, "moving file to quarantine");
+                error!("moving file to quarantine: {}", filename);
                 quarantine.lock().unwrap().add_file(&filename);
             } else {
-                bg_log!(
-                    log::Level::Warn,
-                    "cannot move file to quarantine: quarantine disabled"
+                info!(
+                    "not moving file to quarantine: quarantine disabled"
                 );
             }
 
