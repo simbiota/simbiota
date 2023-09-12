@@ -8,7 +8,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: rust:1.72-bullseye
+    container: rust:1.72-buster
 
     steps:
     - uses: actions/checkout@v3
