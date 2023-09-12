@@ -6,4 +6,4 @@ Architecture: arm64
 Description: Simbiota is a lightweight (both memory and CPU usage) antivirus.
 Maintainer: Ukatemi Technologies Zrt.
 Homepage: https://github.com/simbiota/simbiota
-Depends: jq, curl
+Depends: jq, curl, libc6 (>= 2.28), libgcc-s1 (>= 4.3)
