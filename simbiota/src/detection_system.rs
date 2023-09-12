@@ -73,8 +73,6 @@ pub enum CommandResult {
     QuarantineAction(bool),
 }
 
-static mut VERBOSE_LOG: bool = false;
-
 impl DetectionSystem {
     pub fn register_provider(name: &str, provider: Arc<dyn DetectorProvider + Send + Sync>) {
         REGISTERED_PROVIDERS
@@ -95,9 +93,6 @@ impl DetectionSystem {
         database: Arc<Mutex<SystemDatabase>>,
         verbose_log: bool,
     ) -> Self {
-        unsafe {
-            VERBOSE_LOG = verbose_log;
-        }
         let detector_config = &client_config.detector;
         let class = &detector_config.class;
 
@@ -334,8 +329,7 @@ impl DetectionSystem {
         let filename = maybe_filename.unwrap_or_else(|| "<n/a>".to_string());
         let orig_fname = filename.clone();
 
-        let logname = filename.clone();
-        info!("checking file: {}", logname);
+        info!("checking file: {}", filename);
         // check cache first
         if has_filename {
             if let Some(result) = self.cache.borrow().get_result_for(&filename, event_meta) {
@@ -348,11 +342,11 @@ impl DetectionSystem {
                 return if result == DetectionResult::NoMatch {
                     info!(
                         "detection negative: {} (cached)",
-                        logname
+                        filename
                     );
                     Allow
                 } else {
-                    error!("detection positive: {} (cached)", logname);
+                    error!("detection positive: {} (cached)", filename);
                     self.file_detected_action(filename.clone());
                     Deny
                 };
@@ -364,8 +358,7 @@ impl DetectionSystem {
             .borrow_mut()
             .check_reader(&mut file)
             .unwrap_or_else(|e| {
-                let logname = filename.clone();
-                warn!("error checking file: {} ({})", logname, e);
+                warn!("error checking file: {} ({})", filename, e);
                 no_cache = true; // skip caching this result
                 DetectionResult::NoMatch
             });
@@ -383,11 +376,11 @@ impl DetectionSystem {
         }
 
         if res == DetectionResult::Match {
-            error!("detection positive: {}", logname);
+            error!("detection positive: {}", filename);
             self.file_detected_action(orig_fname);
             debug!("detected actions done");
         } else {
-            info!("detection negative: {}", logname);
+            info!("detection negative: {}", filename);
         }
 
         debug!(
