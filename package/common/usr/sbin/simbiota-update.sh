@@ -15,4 +15,6 @@ curl -s https://api.github.com/repos/simbiota/database-releases/releases/latest 
 | xargs -0 -I{} curl -L -o /tmp/database.sdb '{}'
 EOF
 
-install -o root -g root -m 644 /tmp/database.sdb /var/lib/simbiota/database.sdb && rm /tmp/database.sdb
+mv /tmp/database.sdb /var/lib/simbiota/database.sdb
+chown root:root /var/lib/simbiota/database.sdb
+chmod 644 /var/lib/simbiota/database.sdb
